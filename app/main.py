@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from app.db.session import SessionLocal
-from app import models
 
 app = FastAPI()
 

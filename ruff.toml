@@ -1,0 +1,35 @@
+# Enable flake8-bugbear (`B`) rules.
+select = ["E", "F", "I"]
+
+# Never enforce `E501` (line length violations).
+ignore = []
+
+# Exclude
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Allow lines to be as long as 120 characters.
+line-length = 80
+
+# Allow autofix
+fix = true
