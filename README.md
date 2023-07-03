@@ -13,6 +13,7 @@ Use this template as a starting point to quickly set up a robust and scalable Fa
 - Alembic for seamless database schema migrations
 - Pre-commit framework with mypy and ruff for code formatting and strict typing checks
 - CRUD base class fot instance with needed model
+- Project config file fo ease update configurations
 
 Get started with your FastAPI project in no time using this template repository!
 
