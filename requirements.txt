@@ -4,3 +4,4 @@ pydantic>=1.9.1,<2.0.0
 sqlalchemy>= 1.4.39
 alembic>=1.8.1
 psycopg2-binary>=2.9.5
+pre-commit==3.3.3

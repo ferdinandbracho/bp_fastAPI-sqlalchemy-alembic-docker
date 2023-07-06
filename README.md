@@ -19,6 +19,12 @@ Get started with your FastAPI project in no time using this template repository!
 
 Contributions are welcome! Please submit pull requests with reviewer @ferdinandbracho or open issues for any improvements or bug fixes.
 
+## Usage
+- Create Python [virtual env](https://docs.python.org/3/library/venv.html#module-venv)
+    - [how-to-setup-virtual-environments-in-python](https://www.freecodecamp.org/news/how-to-setup-virtual-environments-in-python/)
 
----
-test
+
+- Init project: this is install initial dependencies, install pre-commit config and run in all file to initial check: Positioning in the project root run make the following make command
+```sh
+    make init
+```

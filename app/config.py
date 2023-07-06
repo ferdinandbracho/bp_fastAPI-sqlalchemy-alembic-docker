@@ -68,8 +68,8 @@ class Config:
 
         if not all([
             self.example_url,
-            self.example_queue_users,
-            self.example_queue_errors
+            self.example_users,
+            self.example_errors
         ]):
             self.logger.warning("Incomplete exampleconfiguration."
                                 "Please check environment variables.")
