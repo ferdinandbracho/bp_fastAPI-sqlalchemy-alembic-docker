@@ -14,6 +14,7 @@ and debug easily
 
 class Config:
     logger = logging.getLogger()
+    PROJECT_NAME = 'TRX SERVICE CONCILIATION'
 
     def __init__(self):
         self.config_logger()
