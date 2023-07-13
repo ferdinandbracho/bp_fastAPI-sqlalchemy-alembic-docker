@@ -9,3 +9,12 @@ engine = create_engine('postgresql+psycopg2://traxi:traxi@localhost:5432/traxi_f
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+# Database Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
