@@ -1,5 +1,27 @@
+# Build artifacts
+*.env
+venv
+*app.log
 .vscode
+*ruff_cache
 .mypy_cache
-__pycache__/
-.env
+.python-version
 
+# Python bytecode
+__pycache__
+*/__pycache__
+
+# Distribution files
+versions/
+
+# IDE settings
+.idea
+.project
+.settings
+
+# Test files
+*.tests
+*.test.*
+
+# rules exception
+!example.env
