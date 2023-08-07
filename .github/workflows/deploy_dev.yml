@@ -1,0 +1,76 @@
+name: Deploy Development
+
+on:
+  push:
+    branches: [ "develop" ] # Update to intended branch or/and trigger
+
+env:
+  # AWS TENANT ENV
+  AWS_REGION: ${{ vars.REGION }} # Update to real reference
+  AWS_ACCESS_KEY : ${{ secrets.ACCESS_KEY }} ## Update to real reference
+  AWS_SECRET_ACCESS_KEY : ${{ secrets._SECRET_ACCESS_KEY }} # Update to real reference
+  # ENVIROMENT ENV
+  ECS_CLUSTER: ${{ vars.CLUSTER_DEV }} # Update to real reference
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }} # Update to real reference
+  ECS_TASK_DEFINITION: .aws/service-dev.json # Update to real reference
+  CONTAINER_NAME: ${{ vars.TASK_CONTAINER }} # Update to real reference
+  ECS_SERVICE: ${{ vars.ECS_SERVICE }} # Update to real reference
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Amazon ECS
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ env.ACCESS_KEY }} # Update to real reference
+        aws-secret-access-key: ${{ env.SECRET_ACCESS_KEY }} # Update to real reference
+        aws-region: ${{ env.REGION }} # Update to real reference
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build Docker image
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: lasted
+      run: |
+        # Build a Docker container
+        docker build -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+    - name: Push image to Amazon ECR
+      id: push-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }} # Update to real reference
+        IMAGE_TAG: lasted
+      run: |
+        # Push the Docker image to ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION }} # Update to real reference
+        container-name: ${{ env.CONTAINER_NAME }} # Update to real reference
+        image: ${{ steps.push-image.outputs.image }} # Update to real reference
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        cluster: ${{ env.ECS_CLUSTER }} # Update to real reference
+        service: ${{ env.ECS_SERVICE }} # Update to real reference
+        wait-for-service-stability: true
