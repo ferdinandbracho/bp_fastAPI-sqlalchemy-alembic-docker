@@ -3,8 +3,9 @@ from sqlalchemy import create_engine
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from app.config import config
 
-engine = create_engine('postgresql+psycopg2://traxi:traxi@localhost:5432/traxi_fleet')
+engine = create_engine(config.database_url, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

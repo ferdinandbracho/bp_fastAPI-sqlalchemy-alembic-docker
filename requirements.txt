@@ -5,3 +5,4 @@ sqlalchemy>= 1.4.39
 alembic>=1.8.1
 psycopg2-binary>=2.9.5
 pre-commit==3.3.3
+python-dotenv==1.0.0

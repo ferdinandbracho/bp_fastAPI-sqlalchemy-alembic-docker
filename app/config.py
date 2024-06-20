@@ -4,17 +4,18 @@ import pathlib
 
 from dotenv import load_dotenv
 
-"""
-Example config project class, use to load env and others configuration.
-
-Crate class method to handle individual configuration and been able to scalade
-and debug easily
-"""
-
 
 class Config:
+    """
+    Config project class, use to load env and others configuration.
+
+    Crate class methods to handle individual configuration and been able
+    to scalade, for example a class method to load third party api, this in
+    order to be able to test individually
+    and debug easily
+    """
     logger = logging.getLogger()
-    PROJECT_NAME = 'TRX SERVICE CONCILIATION'
+    PROJECT_NAME = 'TRX SERVICE ..'
 
     def __init__(self):
         self.config_logger()
@@ -62,6 +63,7 @@ class Config:
             self.logger.error("Incomplete database configuration."
                               "Please check environment variables.")
 
+    # Example configuration for testing purposes
     def load_example_config(self) -> None:
         self.example_url = os.getenv("EXAMPLE_URL")
         self.example_users = os.getenv("EXAMPLE_QUEUE_USERS")

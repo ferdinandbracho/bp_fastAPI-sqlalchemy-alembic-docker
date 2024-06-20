@@ -1,8 +1,9 @@
 import json
+from typing import Optional
+
 import pika
 
 from app.config import config
-from typing import Optional
 
 logger = config.logger
 

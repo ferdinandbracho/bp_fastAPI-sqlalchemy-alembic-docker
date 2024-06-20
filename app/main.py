@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from app.config import config
+
 from app.api.api_v1.api import api_router
+from app.config import config
 
 app = FastAPI(
     title=config.PROJECT_NAME

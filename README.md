@@ -1,4 +1,4 @@
-# FastAPI MS Boiler-Plate
+# FastAPI MicroService Boiler-Plate
 
 This template repository provides a boilerplate setup for building a Dockerized FastAPI project with PostgreSQL as the database backend. It incorporates SQLAlchemy for efficient database interactions and Alembic for database migrations.
 

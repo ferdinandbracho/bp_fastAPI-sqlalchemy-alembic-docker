@@ -12,9 +12,7 @@ Use this template as a starting point to quickly set up a robust and scalable Fa
 - PostgreSQL database integration with SQLAlchemy for efficient data management
 - Alembic for seamless database schema migrations
 - Pre-commit framework with mypy and ruff for code formatting and strict typing checks
-- CRUD base class fot instance with needed model
 
 Get started with your FastAPI project in no time using this template repository!
 
 Contributions are welcome! Please submit pull requests with reviewer @ferdinandbracho or open issues for any improvements or bug fixes.
-.

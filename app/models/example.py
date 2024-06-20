@@ -1,8 +1,8 @@
-from datetime import datetime, timezone
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import TIMESTAMP, Boolean, Column, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 from app.db.session import Base
 
@@ -24,28 +24,31 @@ class ExampleModel(Base):
         as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
-        index=True
+        index=True,
+        doc="Unique identifier for the model."
     )
 
     active = Column(
         Boolean,
         default=True,
-        doc="Is this example active?"
+        doc="Is active?"
     )
 
     created_at = Column(
         TIMESTAMP,
         default=_get_date,
-        doc="When was this example created?"
+        doc="When was created?"
     )
 
     last_update = Column(
         TIMESTAMP,
         default=_get_date,
         onupdate=_get_date,
-        doc="When was this example last updated"
+        doc="When was last updated"
     )
 
-    update_by = Column(String(255), doc="Who updated this example")
+    update_by = Column(String(255), doc="Who updated")
+
+    extra_data = Column(JSONB, doc="Extra data for the model.")
 
 # Delete this file after you have created your first model
