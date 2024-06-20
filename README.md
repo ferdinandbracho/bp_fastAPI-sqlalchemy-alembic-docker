@@ -94,4 +94,13 @@ Towards the end of your README, just before the "Contributing" section (if appli
 ```
 
 ## **Contributing**
-Contributions are welcome!
+
+Contributions are welcome! If you'd like to contribute, please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Implement your changes.
+4. Write or update tests as necessary.
+5. Submit a pull request against the main branch.
+
+Please ensure your code adheres to the project's coding standards and includes appropriate tests.
