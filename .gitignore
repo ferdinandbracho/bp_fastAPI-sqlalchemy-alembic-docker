@@ -1,27 +1,43 @@
 # Build artifacts
 *.env
-venv
+.venv/
+venv/
 *app.log
-.vscode
-*ruff_cache
-.mypy_cache
+.vscode/
+.ruff_cache/
+.mypy_cache/
 .python-version
+*.egg-info/
+build/
+dist/
+*.egg
 
 # Python bytecode
-__pycache__
-*/__pycache__
-
-# Distribution files
-versions/
+__pycache__/
+*.py[cod]
 
 # IDE settings
-.idea
+.idea/
 .project
-.settings
+.settings/
 
-# Test files
-*.tests
-*.test.*
+# Test artifacts (test source files should be versioned)
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+nosetests.xml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor backup/swap files
+*.swp
+*.swo
+
+# Profiling output
+profile_output/
 
 # rules exception
 !example.env
