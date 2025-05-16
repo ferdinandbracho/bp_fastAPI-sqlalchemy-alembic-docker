@@ -1,10 +1,15 @@
-# Enable flake8-bugbear (`B`) rules.
+[project]
+name = "bp-fastapi-sqlalchemy-alembic-docker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.ruff]
 select = ["E", "F", "I"]
-
-# Never enforce `E501` (line length violations).
 ignore = []
-
-# Exclude
+# Exclude migrations from pre-commit and general linting
 exclude = [
     ".bzr",
     ".direnv",
@@ -26,10 +31,7 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
+    "migrations", # Added from pre-commit hook
 ]
-
-# Allow lines to be as long as 120 characters.
 line-length = 80
-
-# Allow autofix
 fix = true
