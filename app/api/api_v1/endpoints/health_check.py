@@ -1,6 +1,8 @@
 
 from typing import Any, Dict
+
 from fastapi import APIRouter, status
+
 from app.config import config
 
 router = APIRouter()

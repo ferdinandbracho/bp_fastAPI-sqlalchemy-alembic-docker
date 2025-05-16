@@ -1,8 +1,8 @@
-fastapi>=0.78.0
-uvicorn>=0.15.0,<0.16.0
-pydantic>=1.9.1,<2.0.0
-sqlalchemy>= 1.4.39
-alembic>=1.8.1
-psycopg2-binary>=2.9.5
-pre-commit==3.3.3
-python-dotenv==1.0.0
+fastapi==0.115.12
+uvicorn==0.34.2
+pydantic==2.11.4
+sqlalchemy==2.0.41
+alembic==1.15.2
+psycopg2-binary==2.9.10
+pre-commit==4.2.0
+python-dotenv==1.1.0

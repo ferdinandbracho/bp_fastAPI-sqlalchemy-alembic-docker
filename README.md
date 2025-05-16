@@ -1,6 +1,6 @@
-# FastAPI Micro-Service Boiler-Plate
+# UV-Powered FastAPI Micro-Service Boilerplate
 
-This repository offers boilerplate code for initiating a [Dockerized](https://www.docker.com/)  [FastAPI](https://fastapi.tiangolo.com/)-[PostgreSQL](https://www.postgresql.org/?&)-[SQLAlchemy](https://www.sqlalchemy.org/)-[Alembic](https://alembic.sqlalchemy.org/en/latest/) project. It includes a [pre-commit](https://pre-commit.com/) framework configured with [mypy](https://mypy.readthedocs.io/en/stable/index.html) and [ruff](https://beta.ruff.rs/docs/) to ensure consistent code formatting and strict typing. Whether you're building microservices or a larger application, this template streamlines your project setup, allowing you to focus on developing your FastAPI-based microservices with confidence
+This repository offers boilerplate code for initiating a UV-managed, [Dockerized](https://www.docker.com/)  [FastAPI](https://fastapi.tiangolo.com/)-[PostgreSQL](https://www.postgresql.org/?&)-[SQLAlchemy](https://www.sqlalchemy.org/)-[Alembic](https://alembic.sqlalchemy.org/en/latest/) project. It includes a [pre-commit](https://pre-commit.com/) framework configured with [mypy](https://mypy.readthedocs.io/en/stable/index.html) and [ruff](https://beta.ruff.rs/docs/) to ensure consistent code formatting and strict typing. Whether you're building microservices or a larger application, this template streamlines your project setup, allowing you to focus on developing your FastAPI-based microservices with confidence using `uv` for package management.
 
 Use this template as a starting point to quickly set up a robust and scalable FastAPI project with PostgreSQL, taking advantage of powerful features like automatic API documentation generation, asynchronous capabilities, and containerization for easy deployment.
 
@@ -82,7 +82,7 @@ Please ensure you update this README after implementing an instance of this temp
 In your README's "Introduction and/or Overview" section (or similar), include the following information:
 
 ```markdown
-The service is built is based on the [fastAPI MS Template](https://github.com/ferdinandbracho/bp_fastAPI-sqlalchemy-alembic-docker). For comprehensive technical details, instructions on how to run, deploy, and any other related considerations, please refer to the documentation provided in the [template repository](https://github.com/ferdinandbracho/bp_fastAPI-sqlalchemy-alembic-docker).
+The service is built is based on the [UV-Powered FastAPI MS Template](https://github.com/ferdinandbracho/bp_fastAPI-sqlalchemy-alembic-docker). For comprehensive technical details, instructions on how to run, deploy, and any other related considerations, please refer to the documentation provided in the [template repository](https://github.com/ferdinandbracho/bp_fastAPI-sqlalchemy-alembic-docker).
 ```
 ### 2 Indeed Information
 
@@ -90,7 +90,7 @@ Towards the end of your README, just before the "Contributing" section (if appli
 
 ```markdown
   ## Indeed Information
-  For detailed information on installation and prerequisites, please refer to the [template repository](https://github.com/ferdinandbracho/bp_fastAPI-sqlalchemy-alembic-docker).
+  For detailed information on installation and prerequisites, please refer to the [UV-Powered FastAPI MS Template repository](https://github.com/ferdinandbracho/bp_fastAPI-sqlalchemy-alembic-docker).
 ```
 
 ## **Contributing**
