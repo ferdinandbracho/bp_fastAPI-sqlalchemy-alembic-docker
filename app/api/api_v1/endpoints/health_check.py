@@ -1,12 +1,11 @@
-
 from typing import Any, Dict
 
 from fastapi import APIRouter, status
 
-from app.config import config
+from app.config import settings
 
 router = APIRouter()
-logger = config.logger
+logger = settings.get_logger(__name__)
 
 
 # health check

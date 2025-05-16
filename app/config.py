@@ -1,81 +1,111 @@
 import logging
-import os
 import pathlib
+from typing import Any, Optional
 
-from dotenv import load_dotenv
+from pydantic import PostgresDsn, ValidationInfo, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Determine the project root directory to reliably find the .env file
+# This assumes config.py is in a subdirectory of the project root (e.g., app/config.py) # noqa: E501
+# Adjust if your structure is different.
+PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
+ENV_FILE_PATH = PROJECT_ROOT / ".env"
 
 
-class Config:
-    """
-    Config project class, use to load env and others configuration.
+class Settings(BaseSettings):
+    # Pydantic settings configuration
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE_PATH,  # Load from .env file at project root
+        env_file_encoding="utf-8",
+        extra="ignore",  # Ignore extra fields not defined in the model
+    )
 
-    Crate class methods to handle individual configuration and been able
-    to scalade, for example a class method to load third party api, this in
-    order to be able to test individually
-    and debug easily
-    """
-    logger = logging.getLogger()
-    PROJECT_NAME = 'TRX SERVICE ..'
+    # Project Meta
+    PROJECT_NAME: str = "UV-Powered FastAPI Boilerplate"
 
-    def __init__(self):
-        self.config_logger()
-        self.load_env()
-        self.load_database_config()
-        self.load_example_config()
+    # Database Configuration
+    DB_USER: str
+    DB_PASS: str
+    DB_HOST: str
+    DB_PORT: str = "5432"  # Default PostgreSQL port
+    DB_NAME: str
+    # DATABASE_URL will be assembled by the validator below
+    # It's Optional here because it's constructed, not directly loaded
+    DATABASE_URL: Optional[PostgresDsn] = None
 
-    def config_logger(self):
-        logging.basicConfig(
-            format='%(asctime)s %(levelname)s %(message)s',
-            level=logging.INFO,
-            datefmt='%Y-%m-%d %H:%M:%S'
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def assemble_db_connection(
+        cls, v: Optional[str], info: ValidationInfo
+    ) -> Any:
+        if isinstance(
+            v, str
+        ):  # If DATABASE_URL is already explicitly set in .env
+            return v
+
+        # Get values from the .env file or defaults
+        values = info.data
+        required_keys = ["DB_USER", "DB_PASS", "DB_HOST", "DB_PORT", "DB_NAME"]
+        if not all(values.get(key) for key in required_keys):
+            # Get a temp logger instance or use print for early config issues
+            temp_logger = logging.getLogger(__name__)
+            temp_logger.warning(
+                "Critical database configuration variables are missing in .env."
+                "Cannot construct DATABASE_URL."
+            )
+            # Pydantic will still raise ValidationError for individually missing *required* root fields. # noqa: E501
+            # This part of the validator is for the case where DATABASE_URL itself isn't set, # noqa: E501
+            # and we are trying to build it from components.
+            return None
+
+        return PostgresDsn.build(
+            scheme="postgresql+psycopg2",  # Keep this, will change to asyncpg later for async # noqa: E501
+            username=values.get("DB_USER"),
+            password=values.get("DB_PASS"),
+            host=values.get("DB_HOST"),
+            port=int(values.get("DB_PORT")),  # Ensure port is an int
+            path=f"/{values.get('DB_NAME') or ''}",
         )
 
-        log_wp = logging.getLogger(__name__)
-        hdlr = logging.StreamHandler()
-        fhdlr = logging.FileHandler("app.log")
-        log_wp.addHandler(hdlr)
-        log_wp.addHandler(fhdlr)
-        log_wp.setLevel(logging.DEBUG)
+    # Example Configuration (optional fields)
+    EXAMPLE_URL: Optional[str] = None
+    EXAMPLE_QUEUE_USERS: Optional[str] = None
+    EXAMPLE_ERROR: Optional[str] = None
 
-        self.logger = log_wp
+    # Logging Configuration
+    LOG_LEVEL: str = "INFO"
 
-    def load_env(self) -> None:
-        try:
-            load_dotenv()
-            env_path = pathlib.Path('.') / '.env'
-            load_dotenv(dotenv_path=env_path)
-        except Exception as e:
-            logging.warning(f"Failed to load .env file: {e}")
+    def get_logger(self, name: str) -> logging.Logger:
+        """Configures and returns a logger instance."""
+        logger = logging.getLogger(name)
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        handler.setFormatter(formatter)
+        if (
+            not logger.handlers
+        ):  # Avoid adding multiple handlers if called multiple times
+            logger.addHandler(handler)
+        logger.setLevel(self.LOG_LEVEL.upper())
 
-    def load_database_config(self) -> None:
-        db_user = os.getenv('DB_USER')
-        db_pass = os.getenv('DB_PASS')
-        db_host = os.getenv('DB_HOST')
-        db_port = os.getenv('DB_PORT')
-        db_name = os.getenv('DB_NAME')
+        # Consider adding a FileHandler like you had before if needed
+        # file_handler = logging.FileHandler(PROJECT_ROOT / "app.log")
+        # file_handler.setFormatter(formatter)
+        # logger.addHandler(file_handler)
 
-        if all([db_user, db_pass, db_host, db_port, db_name]):
-            self.database_url = (
-                f'postgresql+psycopg2://{db_user}:{db_pass}@'
-                f'{db_host}:{db_port}/{db_name}'
-            )
-        else:
-            self.logger.error("Incomplete database configuration."
-                              "Please check environment variables.")
-
-    # Example configuration for testing purposes
-    def load_example_config(self) -> None:
-        self.example_url = os.getenv("EXAMPLE_URL")
-        self.example_users = os.getenv("EXAMPLE_QUEUE_USERS")
-        self.example_errors = os.getenv("EXAMPLE_ERROR")
-
-        if not all([
-            self.example_url,
-            self.example_users,
-            self.example_errors
-        ]):
-            self.logger.warning("Incomplete exampleconfiguration."
-                                "Please check environment variables.")
+        return logger
 
 
-config = Config()
+# Create a single instance of the settings to be used throughout the application
+settings = Settings()
+
+# Example: Get a logger for the current module (config.py)
+# You can get loggers in other modules similarly: from app.config import settings; logger = settings.get_logger(__name__) # noqa: E501
+# logger = settings.get_logger(__name__)
+# logger.info("Configuration loaded successfully.")
+# if settings.DATABASE_URL:
+#     logger.info(f"Database URL: {settings.DATABASE_URL}")
+# else:
+#     logger.warning("DATABASE_URL could not be constructed. Check .env file and DB settings.") # noqa: E501

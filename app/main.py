@@ -2,10 +2,11 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.api_v1.api import api_router
-from app.config import config
+from app.config import settings
+from app.db.base import Base  # noqa: F401
 
 app = FastAPI(
-    title=config.PROJECT_NAME
+    title=settings.PROJECT_NAME
 )
 
 app.add_middleware(

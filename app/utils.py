@@ -3,9 +3,9 @@ from typing import Optional
 
 import pika
 
-from app.config import config
+from app.config import settings
 
-logger = config.logger
+logger = settings.get_logger(__name__)
 
 
 def send_message_rabbit(rabbit_url: str, queue: str, message: dict) -> bool:

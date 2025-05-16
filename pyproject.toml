@@ -4,7 +4,21 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi==0.115.12",
+    "uvicorn==0.34.2",
+    "pydantic==2.11.4",
+    "sqlalchemy==2.0.41",
+    "alembic==1.15.2",
+    "psycopg2-binary==2.9.10",
+    "python-dotenv==1.1.0",
+    "pydantic-settings==2.3.4"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit==4.2.0"
+]
 
 [tool.ruff]
 select = ["E", "F", "I"]
@@ -35,3 +49,6 @@ exclude = [
 ]
 line-length = 80
 fix = true
+
+[tool.setuptools]
+packages = ["app"]

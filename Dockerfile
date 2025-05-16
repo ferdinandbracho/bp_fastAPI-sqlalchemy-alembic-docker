@@ -1,13 +1,13 @@
 # Base
 FROM python:3.11
 
-# Set working diretory
+# Set working directory
 WORKDIR /code
 
-# copy requirements.txt and install
-COPY ./requirements.txt /code/requirements.txt
+# copy pyproject.toml and install dependencies
+COPY ./pyproject.toml /code/pyproject.toml
 RUN pip install uv
-RUN uv pip install --system --no-cache-dir -r /code/requirements.txt
+RUN uv pip install --system --no-cache-dir .
 
 # Copy FastAPI application
 COPY ./app /code/app
