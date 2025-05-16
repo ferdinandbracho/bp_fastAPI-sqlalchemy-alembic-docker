@@ -1,61 +1,121 @@
-name: Deploy Development
+name: Dev CI/CD Pipeline
 
 on:
   push:
-    branches: [ "develop" ] # Update to intended branch or/and trigger
+    branches: [ "develop" ] # Ensure this is your intended development branch
+  pull_request:
+    branches: [ "develop" ] # Run quality checks on PRs to develop
 
 env:
   # AWS TENANT ENV
-  AWS_REGION: ${{ vars.REGION }} # Update to real reference
-  AWS_ACCESS_KEY : ${{ secrets.ACCESS_KEY }} ## Update to real reference
-  AWS_SECRET_ACCESS_KEY : ${{ secrets._SECRET_ACCESS_KEY }} # Update to real reference
+  AWS_REGION: ${{ vars.REGION }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }} # Standard GitHub secret name convention
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # Standard GitHub secret name convention
   # ENVIROMENT ENV
-  ECS_CLUSTER: ${{ vars.CLUSTER_DEV }} # Update to real reference
-  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }} # Update to real reference
-  ECS_TASK_DEFINITION: .aws/service-dev.json # Update to real reference
-  CONTAINER_NAME: ${{ vars.TASK_CONTAINER }} # Update to real reference
-  ECS_SERVICE: ${{ vars.ECS_SERVICE }} # Update to real reference
+  ECS_CLUSTER: ${{ vars.CLUSTER_DEV }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  ECS_TASK_DEFINITION: .aws/service-dev.json
+  CONTAINER_NAME: ${{ vars.TASK_CONTAINER }}
+  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
+  PYTHON_VERSION: '3.11' # Define Python version once
 
 permissions:
   contents: read
+  # id-token: write # Uncomment if using OIDC for AWS authentication
 
 jobs:
-  deploy:
-    name: Deploy to Amazon ECS
+  quality_checks:
+    name: Lint, Test & Scan Code
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Cache uv global directory
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+
+      - name: Install dependencies
+        run: uv pip install --system ".[dev]"
+
+      - name: Lint with Ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Type check with MyPy
+        run: uv run mypy .
+
+      - name: Run tests with Pytest
+        run: uv run pytest # Assumes pytest is your test runner
+
+      - name: Scan Python dependencies with pip-audit
+        run: |
+          uv pip install pip-audit
+          uv run pip-audit
+
+  deploy:
+    name: Build, Scan Docker & Deploy to Amazon ECS
+    runs-on: ubuntu-latest
+    needs: quality_checks # Ensure quality checks pass before deploying
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop' # Only deploy on push to develop branch
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v4 # Updated version
       with:
-        aws-access-key-id: ${{ env.ACCESS_KEY }} # Update to real reference
-        aws-secret-access-key: ${{ env.SECRET_ACCESS_KEY }} # Update to real reference
-        aws-region: ${{ env.REGION }} # Update to real reference
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY }} 
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2 # Updated version
+
+    - name: Set dynamic image tag
+      id: image-tag
+      run: echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
 
     - name: Build Docker image
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: lasted
+        IMAGE_TAG: ${{ steps.image-tag.outputs.tag }}
       run: |
-        # Build a Docker container
         docker build -f Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+    - name: Scan Docker image with Trivy
+      uses: aquasecurity/trivy-action@0.24.0 # Using Trivy GitHub Action
+      with:
+        image-ref: '${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.tag }}'
+        format: 'table'
+        exit-code: '1' # Fail if vulnerabilities are found
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
 
     - name: Push image to Amazon ECR
       id: push-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }} # Update to real reference
-        IMAGE_TAG: lasted
+        ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+        IMAGE_TAG: ${{ steps.image-tag.outputs.tag }}
       run: |
-        # Push the Docker image to ECR
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -63,14 +123,13 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }} # Update to real reference
-        container-name: ${{ env.CONTAINER_NAME }} # Update to real reference
-        image: ${{ steps.push-image.outputs.image }} # Update to real reference
+        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        container-name: ${{ env.CONTAINER_NAME }}
+        image: ${{ steps.push-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        cluster: ${{ env.ECS_CLUSTER }} # Update to real reference
-        service: ${{ env.ECS_SERVICE }} # Update to real reference
-        wait-for-service-stability: true
+        service: ${{ env.ECS_SERVICE }} # Added service parameter, common for deployments
+        cluster: ${{ env.ECS_CLUSTER }}

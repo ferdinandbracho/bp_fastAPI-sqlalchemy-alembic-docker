@@ -17,7 +17,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pre-commit==4.2.0"
+    "pre-commit==4.2.0",
+    "pytest==8.3.2",
+    "pytest-cov==5.0.0",
+    "pip-audit==2.7.3"
 ]
 
 [tool.ruff]
